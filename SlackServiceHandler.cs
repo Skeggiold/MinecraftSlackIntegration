@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace MinecraftSlackIntegration
 {
@@ -36,7 +37,7 @@ namespace MinecraftSlackIntegration
             var request = new RestRequest(uri.PathAndQuery, Method.POST);
 
             //serialize the json data
-            string data_json = @"{""username"": """ + username + @""", ""text"": """ + text + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}?date={1}", username, DateTime.Today.ToShortDateString()) + @"""}";
+            string data_json = @"{""username"": """ + username + @""", ""text"": """ + HttpUtility.HtmlEncode(text) + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}?date={1}", username, DateTime.Today.ToShortDateString()) + @"""}";
 
             //Add paramter to the request
             request.AddParameter("payload", data_json);
