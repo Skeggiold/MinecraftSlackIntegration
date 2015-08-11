@@ -16,6 +16,8 @@ namespace MinecraftSlackIntegration
         static void Main(string[] args)
         {
             Parallel.Invoke(() => HostWebservice(), () => MonitorMinecraftLog());
+            //Parallel.Invoke(() => MonitorMinecraftLog());
+            //Parallel.Invoke(() => HostWebservice());
         }
 
         private static object MonitorMinecraftLog()
@@ -42,13 +44,14 @@ namespace MinecraftSlackIntegration
             Regex regex = new Regex(@"^(.*?)INFO\]\: \<(.*?)\> (.*?)$");
             if (regex.IsMatch(logLine))
             {
-                SlackServiceHandler.SayInSlack(regex.GetGroupNames()[1], regex.GetGroupNames()[2]);
+                string[] splitLogLine = regex.Split(logLine);
+                SlackServiceHandler.SayInSlack(splitLogLine[2], splitLogLine[3]);
             }
         }
 
         private static object HostWebservice()
         {
-            WebServiceHost host = new WebServiceHost(typeof(SlackService));
+            WebServiceHost host = new WebServiceHost(typeof(SlackService), new Uri("http://localhost:8080/hook"));
             host.Open();
             while (true)
             {

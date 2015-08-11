@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -18,7 +19,7 @@ namespace MinecraftSlackIntegration
                 return;
 
             //Check token validity
-            if (token == ConfigurationManager.AppSettings["Slack_Token"].ToString())
+            if (token == ConfigurationManager.AppSettings["Slack_Outgoing_Token"].ToString())
             {
                 MinecraftHandler.SayInGame(user_name, text);
             }
@@ -28,27 +29,26 @@ namespace MinecraftSlackIntegration
 
         public static void SayInSlack(string username, string text)
         {
-            //Create the request URL
-            WebRequest request = WebRequest.Create(ConfigurationManager.AppSettings["Slack_URL"]);
-            request.Method = "POST";
-            request.ContentType = "text/json";
+            //Set the uri
+            var uri = new Uri(ConfigurationManager.AppSettings["Slack_Incoming_URL"], UriKind.Absolute);
 
-            //Serialize the json data
-            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-            {
-                string data_json = @"{""username"": """ + username + @""", ""text"": """ + text + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}?date={1}", username, DateTime.Today.ToShortDateString()) + @"""}";
-                streamWriter.Write(data_json);
-                streamWriter.Flush();
-                streamWriter.Close();
-            }
+            //create a new rest request
+            var request = new RestRequest(uri.PathAndQuery, Method.POST);
 
-            //Get the response and log to console
-            var response = (HttpWebResponse)request.GetResponse();
-            using (var streamReader = new StreamReader(response.GetResponseStream()))
-            {
-                var result = streamReader.ReadToEnd();
-                Console.WriteLine(result);
-            }
+            //serialize the json data
+            string data_json = @"{""username"": """ + username + @""", ""text"": """ + text + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}?date={1}", username, DateTime.Today.ToShortDateString()) + @"""}";
+
+            //Add paramter to the request
+            request.AddParameter("payload", data_json);
+
+            //Create a client
+            var restClient = new RestClient(uri.GetLeftPart(UriPartial.Authority));
+
+            //Send the request and receive a response
+            var response = restClient.Execute(request);
+
+            //Save response to console
+            Console.WriteLine("Sending " + data_json + "\nResult: " + response.StatusDescription);
         }
     }
 }
