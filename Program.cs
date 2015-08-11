@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.ServiceModel.Web;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,6 +48,8 @@ namespace MinecraftSlackIntegration
 
         private static object HostWebservice()
         {
+            //Permissions need to be given through the following command:
+            //C:\Windows\system32>netsh http add urlacl url=http://+:80/hook user=DOMAIN\user
             WebServiceHost host = new WebServiceHost(typeof(SlackService), new Uri("http://localhost:8080/hook"));
             host.Open();
             while (true)
