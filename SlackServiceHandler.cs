@@ -7,16 +7,16 @@ namespace MinecraftSlackIntegration
 {
     public class SlackServiceHandler
     {
-        public static void HandlePostSlackToMinecraft(string token, string user_name, string text)
+        public static void HandlePostSlackToMinecraft(SlackMessage message)
         {
             //Ignore empty text and bot messages
-            if (string.IsNullOrEmpty(text) || user_name == "slackbot")
+            if (string.IsNullOrEmpty(message.Text) || message.UserName == "slackbot")
                 return;
 
             //Check token validity
-            if (token == ConfigurationManager.AppSettings["Slack_Outgoing_Token"].ToString())
+            if (message.Token == ConfigurationManager.AppSettings["Slack_Outgoing_Token"].ToString())
             {
-                MinecraftHandler.SayInGame(user_name, text);
+                MinecraftHandler.SayInGame(message.UserName, message.Text);
             }
             else
                 throw new UnauthorizedAccessException("Token values do not match.");
@@ -31,7 +31,7 @@ namespace MinecraftSlackIntegration
             var request = new RestRequest(uri.PathAndQuery, Method.POST);
 
             //serialize the json data
-            string data_json = @"{""username"": """ + username + @""", ""text"": """ + HttpUtility.HtmlEncode(text) + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}?date={1}", username, DateTime.Today.ToShortDateString()) + @"""}";
+            string data_json = @"{""username"": """ + username + @""", ""text"": """ + HttpUtility.HtmlEncode(text) + @""", ""icon_url"": """ + String.Format("https://crafatar.com/avatars/{0}", username) + @"""}";
 
             //Add paramter to the request
             request.AddParameter("payload", data_json);

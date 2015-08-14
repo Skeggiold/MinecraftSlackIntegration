@@ -10,7 +10,7 @@ namespace MinecraftSlackIntegration
         public static void SayInGame(string username, string text)
         {
             //Create the JSON data
-            string json_data = @"{ ""text"" : ""< " + username + @"> " + HttpUtility.HtmlDecode(text) + @""" }";
+            string json_data = @"{ ""text"" : ""<" + username + @"> " + HttpUtility.HtmlDecode(HttpUtility.UrlDecode(text)) + @""" }";
             using (var rcon = RCONClient.INSTANCE)
             {
                 //Send the json data via the /tellraw command, through RCON, to the minecraft server

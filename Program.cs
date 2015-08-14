@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
+using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,8 +14,6 @@ namespace MinecraftSlackIntegration
         static void Main(string[] args)
         {
             Parallel.Invoke(() => HostWebservice(), () => MonitorMinecraftLog());
-            //Parallel.Invoke(() => MonitorMinecraftLog());
-            //Parallel.Invoke(() => HostWebservice());
         }
 
         private static object MonitorMinecraftLog()
@@ -50,7 +49,9 @@ namespace MinecraftSlackIntegration
         {
             //Permissions need to be given through the following command:
             //C:\Windows\system32>netsh http add urlacl url=http://+:80/hook user=DOMAIN\user
-            WebServiceHost host = new WebServiceHost(typeof(SlackService), new Uri("http://localhost:8080/hook"));
+            WebHttpBinding binding = new WebHttpBinding();
+            WebServiceHost host = new WebServiceHost(typeof(SlackService));
+            host.AddServiceEndpoint(typeof(ISlackService), binding, "http://localhost:25555/SlackService");
             host.Open();
             while (true)
             {
